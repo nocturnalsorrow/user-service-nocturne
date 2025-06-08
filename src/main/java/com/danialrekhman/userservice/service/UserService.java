@@ -9,19 +9,17 @@ import java.util.Optional;
 
 public interface UserService {
 
-    List<User> getAllUsers();
+    User signUpUser(User user);
+
+    String verifyAndReturnToken(User user);
+
+    User saveUser(User user);
+
+    User saveUser(User user, MultipartFile imageFile, Authentication authentication);
+
+    boolean deleteUserByEmail(String email);
 
     Optional<User> getUserByEmail(String email);
 
-    boolean signUpUser(User user);
-
-    String verify(User user);
-
-    void saveUser(User user);
-
-    void saveUser(User user, MultipartFile imageFile, Authentication authentication);
-
-    void deleteUserByEmail(String email);
-
-
+    List<User> getAllUsers();
 }

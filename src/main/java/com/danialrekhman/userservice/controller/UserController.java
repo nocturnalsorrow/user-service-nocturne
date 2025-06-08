@@ -6,6 +6,7 @@ import com.danialrekhman.userservice.model.User;
 import com.danialrekhman.userservice.service.UserService;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -26,16 +27,22 @@ public class UserController {
 
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody UserDTO userDTO) {
+        try {
+            User user = new User();
+            user.setEmail(userDTO.getEmail());
+            user.setPassword(userDTO.getPassword());
+            user.setUsername(userDTO.getUsername());
 
-        User user = new User();
-        user.setEmail(userDTO.getEmail());
-        user.setPassword(userDTO.getPassword());
-        user.setUsername(userDTO.getUsername());
+            User savedUser = userService.signUpUser(user);
 
-        if (userService.signUpUser(user))
-            return ResponseEntity.ok("User registered successfully");
+            return ResponseEntity.ok("User registered successfully with email: " + savedUser.getEmail());
 
-        return ResponseEntity.badRequest().body("User with this email already exists");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Unexpected error: " + e.getMessage());
+        }
     }
 
     @PostMapping("/login")
@@ -45,7 +52,7 @@ public class UserController {
         user.setEmail(userDTO.getEmail());
         user.setPassword(userDTO.getPassword());
 
-        String token = userService.verify(user);
+        String token = userService.verifyAndReturnToken(user);
         return ResponseEntity.ok(new AuthResponseDTO(token));
     }
 
@@ -81,7 +88,8 @@ public class UserController {
 
     @DeleteMapping("/{email}")
     public ResponseEntity<String> deleteUser(@PathVariable String email) {
-        userService.deleteUserByEmail(email);
-        return ResponseEntity.ok("User deleted");
+        if (!userService.deleteUserByEmail(email))
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with email '" + email + "' not found");
+        return ResponseEntity.ok("User with email '" + email + "' was successfully deleted");
     }
 }
