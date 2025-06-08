@@ -61,15 +61,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String verifyAndReturnToken(User user) {
-
         Authentication authentication =
                 authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(
                                 user.getEmail(), user.getPassword()));
 
-        if(authentication.isAuthenticated())
-            return jwtService.generateToken(user.getEmail());
-        else
+        if (authentication.isAuthenticated()) {
+            User fullUser = userRepository.findByEmail(user.getEmail())
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+            return jwtService.generateToken(fullUser.getEmail(), fullUser.getRole().name());
+        } else
             throw new BadCredentialsException("Wrong email or password");
     }
 
