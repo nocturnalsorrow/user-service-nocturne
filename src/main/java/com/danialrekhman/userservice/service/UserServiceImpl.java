@@ -76,54 +76,44 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User saveUser(User user) {
+    public User createUser(User user) {
 
-        return userRepository.save(user);
+        if (userRepository.existsByEmail(user.getEmail()))
+            throw new IllegalArgumentException("Email already in use");
+
+        if (user.getEmail() == null || user.getEmail().isBlank())
+            throw new IllegalArgumentException("Email is required");
+
+        if (user.getUsername() == null || user.getUsername().isBlank())
+            throw new IllegalArgumentException("Username is required");
+
+        if (user.getPassword() == null || user.getPassword().isBlank())
+            throw new IllegalArgumentException("Password is required");
+
+        User newUser = new User();
+        newUser.setEmail(user.getEmail());
+        newUser.setUsername(user.getUsername());
+        newUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        newUser.setRole(user.getRole() != null ? user.getRole() : Role.ROLE_USER);
+
+        return userRepository.save(newUser);
     }
 
     @Override
-    public User saveUser(User user, MultipartFile imageFile, Authentication authentication) {
-        User dbUser;
-
-        if (authentication != null && authentication.getName() != null) {
-            // Обновление существующего пользователя
-            dbUser = userRepository.findByEmail(authentication.getName())
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-            if (user.getUsername() != null && !user.getUsername().isBlank()) {
-                dbUser.setUsername(user.getUsername());
-            }
-
-            if (user.getPassword() != null && !user.getPassword().isBlank()) {
-                dbUser.setPassword(passwordEncoder.encode(user.getPassword()));
-            }
-
-        } else {
-            // Создание нового пользователя
-            if (userRepository.existsByEmail(user.getEmail())) {
-                throw new IllegalArgumentException("Email already in use");
-            }
-
-            if (user.getEmail() == null || user.getEmail().isBlank()) {
-                throw new IllegalArgumentException("Email is required");
-            }
-
-            if (user.getUsername() == null || user.getUsername().isBlank()) {
-                throw new IllegalArgumentException("Username is required");
-            }
-
-            if (user.getPassword() == null || user.getPassword().isBlank()) {
-                throw new IllegalArgumentException("Password is required");
-            }
-
-            dbUser = new User();
-            dbUser.setEmail(user.getEmail());
-            dbUser.setUsername(user.getUsername());
-            dbUser.setPassword(passwordEncoder.encode(user.getPassword()));
-            dbUser.setRole(user.getRole() != null ? user.getRole() : Role.ROLE_USER);
+    public User updateUser(User user, MultipartFile imageFile, Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            throw new SecurityException("Unauthorized to update user");
         }
 
-        // Установка аватара
+        User dbUser = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        if (user.getUsername() != null && !user.getUsername().isBlank())
+            dbUser.setUsername(user.getUsername());
+
+        if (user.getPassword() != null && !user.getPassword().isBlank())
+            dbUser.setPassword(passwordEncoder.encode(user.getPassword()));
+
         if (imageFile != null && !imageFile.isEmpty()) {
             try {
                 dbUser.setProfileImage(imageFile.getBytes());

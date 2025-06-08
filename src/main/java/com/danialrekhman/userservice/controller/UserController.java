@@ -82,7 +82,7 @@ public class UserController {
             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
             Authentication authentication
     ) {
-        userService.saveUser(user, imageFile, authentication);
+        userService.updateUser(user, imageFile, authentication);
         return ResponseEntity.ok("User successfully updated");
     }
 

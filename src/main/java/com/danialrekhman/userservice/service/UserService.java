@@ -13,9 +13,9 @@ public interface UserService {
 
     String verifyAndReturnToken(User user);
 
-    User saveUser(User user);
+    User createUser(User user);
 
-    User saveUser(User user, MultipartFile imageFile, Authentication authentication);
+    User updateUser(User user, MultipartFile imageFile, Authentication authentication);
 
     boolean deleteUserByEmail(String email);
 
