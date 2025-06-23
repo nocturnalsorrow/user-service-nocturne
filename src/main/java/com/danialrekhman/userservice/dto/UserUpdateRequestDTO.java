@@ -6,6 +6,7 @@ import lombok.*;
 @Setter
 @Builder
 @AllArgsConstructor
-public class AuthResponseDTO {
-    private String token;
+public class UserUpdateRequestDTO {
+    private String username;
+    private String password;
 }

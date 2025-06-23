@@ -1,11 +1,10 @@
 package com.danialrekhman.userservice.service;
 
+import com.danialrekhman.userservice.dto.UserUpdateRequestDTO;
 import com.danialrekhman.userservice.model.User;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface UserService {
 
@@ -13,13 +12,11 @@ public interface UserService {
 
     String verifyAndReturnToken(User user);
 
-    User createUser(User user);
+    User updateUser(String email, UserUpdateRequestDTO requestDTO, Authentication authentication);
 
-    User updateUser(User user, MultipartFile imageFile, Authentication authentication);
+    void deleteUserByEmail(String email, Authentication authentication);
 
-    boolean deleteUserByEmail(String email);
+    User getUserByEmail(String email, Authentication authentication);
 
-    Optional<User> getUserByEmail(String email);
-
-    List<User> getAllUsers();
+    List<User> getAllUsers(Authentication authentication);
 }

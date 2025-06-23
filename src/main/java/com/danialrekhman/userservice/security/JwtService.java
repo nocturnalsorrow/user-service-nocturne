@@ -22,9 +22,7 @@ public class JwtService {
     public String generateToken(String email, String role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role);
-
         long expirationTimeMillis = 1000 * 60 * 60; // 1 hour
-
         return Jwts.builder()
                 .claims()
                 .add(claims)
@@ -37,7 +35,6 @@ public class JwtService {
     }
 
     private SecretKey getSecretKey() {
-
         return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -46,12 +43,10 @@ public class JwtService {
     }
 
     public String extractRole(String token) {
-
         return extractClaim(token, claims -> claims.get("role", String.class));
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
